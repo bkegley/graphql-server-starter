@@ -1,15 +1,14 @@
-export const typeDef = `
+export default `
     type Cat {
         _id: String!
         name: String!
+}
+    extend type Query {
+        getCats: [Cat]
+        getCatById(_id: String!): Cat
     }
-`
 
-export const query = `
-    getCats: [Cat!]!
-    getCatById(_id: String!): Cat!
-`
-
-export const mutation = `
-    createCat(name: String!): Cat!
+    extend type Mutation {
+        createCat(name: String!): Cat!
+    }
 `

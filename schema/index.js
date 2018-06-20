@@ -1,5 +1,9 @@
 import types from './types'
-import queries from './queries'
-import mutations from './mutations'
+import { queries } from './roots'
+import { mutations } from './roots'
 
-export default [queries, mutations, types]
+export default [
+    queries,
+    mutations,
+    types
+]
