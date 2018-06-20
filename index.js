@@ -2,7 +2,9 @@ require('dotenv').config()
 
 import express from 'express'
 import bodyParser from 'body-parser'
-
+import { createServer } from 'http'
+import { execute, subscribe } from 'graphql'
+import { SubscriptionServer } from 'subscriptions-transport-ws'
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express'
 import { makeExecutableSchema } from 'graphql-tools'
 import typeDefs from './schema'
@@ -27,7 +29,15 @@ const PORT = process.env.PORT || 3000
 app.use('/graphql', bodyParser.json(), graphqlExpress(req => ({ schema, context: {models, req }})))
 app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }))
 
-app.listen(PORT, () => {
-    console.log(`app listening on port ${PORT}`)
-})
+const server = createServer(app)
 
+server.listen(PORT, () => {
+    new SubscriptionServer({
+      execute,
+      subscribe,
+      schema
+    }, {
+      server,
+      path: '/subscriptions'
+    })
+})
