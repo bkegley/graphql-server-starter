@@ -2,6 +2,7 @@ require('dotenv').config()
 
 import express from 'express'
 import bodyParser from 'body-parser'
+import cors from 'cors'
 
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express'
 import { makeExecutableSchema } from 'graphql-tools'
@@ -24,6 +25,7 @@ const app = express()
 
 const PORT = process.env.PORT || 3000
 
+app.use(cors())
 app.use('/graphql', bodyParser.json(), graphqlExpress(req => ({ schema, context: {models, req }})))
 app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }))
 
