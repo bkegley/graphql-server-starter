@@ -24,7 +24,7 @@ const app = express()
 
 const PORT = process.env.PORT || 3000
 
-app.use('/graphql', bodyParser.json(), graphqlExpress({ schema, context: models }))
+app.use('/graphql', bodyParser.json(), graphqlExpress(req => ({ schema, context: {models, req }})))
 app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }))
 
 app.listen(PORT, () => {
