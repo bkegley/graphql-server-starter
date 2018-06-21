@@ -11,4 +11,8 @@ export default `
     extend type Mutation {
         createCat(name: String!): Cat!
     }
+
+    extend type Subscription {
+        catAdded: Cat
+    }
 `
