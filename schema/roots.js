@@ -8,3 +8,9 @@ export const mutations = `
         _root: String
     }
 `
+
+export const subscriptions = `
+    type Subscription {
+        _root: String
+    }
+`

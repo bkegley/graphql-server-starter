@@ -1,5 +1,5 @@
 import types from './types'
-import subscriptions from './types/subscription'
+import { subscriptions } from './roots'
 import { queries } from './roots'
 import { mutations } from './roots'
 

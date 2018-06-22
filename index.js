@@ -10,6 +10,7 @@ import { graphqlExpress, graphiqlExpress } from 'apollo-server-express'
 import { makeExecutableSchema } from 'graphql-tools'
 import typeDefs from './schema'
 import resolvers from './resolvers'
+import schemaDirectives from './resolvers/directives'
 import * as models from './models'
 
 import mongoose from 'mongoose'
@@ -21,6 +22,7 @@ mongoose.connect(`mongodb://localhost/${process.env.DB_NAME || 'graphql-server'}
 const schema = makeExecutableSchema({
     typeDefs,
     resolvers,
+    schemaDirectives
 })
 
 const app = express()
@@ -34,6 +36,7 @@ app.use('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }))
 const server = createServer(app)
 
 server.listen(PORT, () => {
+  console.log(`Server listening on port: ${PORT}`)
     new SubscriptionServer({
       execute,
       subscribe,
