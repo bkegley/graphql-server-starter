@@ -1,7 +1,7 @@
 export default `
     type Cat {
-        _id: String!
-        name: String!
+        _id: String
+        name: String
 }
     extend type Query {
         getCats: [Cat]
