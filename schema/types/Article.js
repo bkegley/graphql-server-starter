@@ -6,8 +6,21 @@ export default `
         tags: [String]
         description: String
         content: String
-        user: ID
+        userId: ID
+        user: User
+        comments: [ArticleComment]
         published: Boolean
+        createdAt: Float
+        updatedAt: Float
+    }
+
+    type ArticleComment implements CommentInterface {
+        _id: ID
+        text: String
+        userId: ID
+        user: User
+        parentResource: ID
+        comments: [Comment!]
         createdAt: Float
         updatedAt: Float
     }
@@ -24,8 +37,14 @@ export default `
             category: String
             content: String
             desciption: String
-            user: ID
+            userId: ID
         ): Article
+
+        createArticleComment(
+            text: String!
+            parentResource: ID
+            userId: ID
+        ): ArticleComment
 
         deleteArticle(_id: ID): Boolean
     }

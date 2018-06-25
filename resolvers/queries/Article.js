@@ -14,7 +14,20 @@ export const query = {
 export const Article = {
     user: async (parent, args, { models }) => {
         const { User } = models
-        const user = await User.findOne({_id: parent.user})
+        const user = await User.findOne({_id: parent.userId})
         return user
+    },
+    comments: async (parent, args, { models }) => {
+        const { Comment } = models
+        const comments = await Comment.find({parentResource: parent._id})
+        return comments
     }
+}
+
+export const ArticleComment = {
+    user: async (parent, args, { models }) => {
+        const { User } = models
+        const user = User.findOne({_id: parent.userId})
+        return user
+    } 
 }

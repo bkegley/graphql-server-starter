@@ -19,7 +19,7 @@ const Article = new Schema({
     content: {
         type: String
     },
-    user: {
+    userId: {
         type: String
     },
     published: {
