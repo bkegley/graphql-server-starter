@@ -8,8 +8,8 @@ export default `
         content: String
         user: ID
         published: Boolean
-        createdAt: String
-        updatedAt: String
+        createdAt: Float
+        updatedAt: Float
     }
 
     extend type Query {
