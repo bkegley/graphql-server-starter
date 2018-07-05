@@ -2,7 +2,7 @@ require('dotenv').config()
 import jwt from 'jsonwebtoken'
 import { defaultFieldResolver } from 'graphql'
 import { SchemaDirectiveVisitor } from 'graphql-tools'
-import { AuthenticationError, AuthorizationError } from '../errors'
+import { AuthenticationError, AuthorizationError } from '../../utils/errors'
 
 class AuthenticationDirective extends SchemaDirectiveVisitor {
     resolve(field) {
