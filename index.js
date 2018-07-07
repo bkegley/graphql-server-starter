@@ -20,7 +20,11 @@ import mongoose from 'mongoose'
 
 
 // initialize database connection
-mongoose.connect(`mongodb://localhost/${process.env.DB_NAME || 'graphql-server'}`)
+const DB_URL = process.env.DB_URL || (`mongodb://localhost/${process.env.DB_NAME || 'graphql-server'}`)
+mongoose.connect(DB_URL).then(
+  () => { console.log('Connected to mongodb') },
+  err => { console.log(`Mongodb connection error: \n${err}`) }
+);
 
 const schema = makeExecutableSchema({
     typeDefs,
