@@ -1,4 +1,4 @@
-export const query = {
+export const queries = {
     getArticles: async (parent, args, { models }) => {
         const { Article } = models
         const articles = await Article.find(args)
@@ -8,6 +8,27 @@ export const query = {
         const { Article } = models
         const article = await Article.findOne(args)
         return article
+    }
+}
+
+export const mutations = {
+    createArticle: async (parent, args, { models }) => {
+        const { Article } = models
+        const article = await new Article(args).save()
+        return article
+    },
+    createArticleComment: async (parent, args, { models }) => {
+        const { Comment } = models
+        const articleComment = await new Comment({
+            ...args,
+            isArticleComment: true
+        }).save()
+        return articleComment
+    },
+    deleteArticle: async (parent, args, { models }) => {
+        const { Article } = models
+        const response = await Article.deleteOne(args)
+        return response.n === 1 ? true : false
     }
 }
 

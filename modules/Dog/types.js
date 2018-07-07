@@ -1,15 +1,14 @@
 export default `
     type Dog {
-        _id: String
-        name: String
+        _id: ID
+        cat: String
     }
 
     extend type Query {
         getDogs: [Dog]
-        getDogById: Dog
     }
 
     extend type Mutation {
-        createDog(name: String!): Dog!
+        createDog: Dog
     }
 `

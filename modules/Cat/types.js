@@ -1,15 +1,15 @@
 export default `
     type Cat {
-        _id: String
-        name: String
-}
+        _id: ID
+        dog: String
+    }
+
     extend type Query {
         getCats: [Cat]
-        getCatById(_id: String!): Cat
     }
 
     extend type Mutation {
-        createCat(name: String!): Cat!
+        createCat: Cat
     }
 
     extend type Subscription {

@@ -1,4 +1,4 @@
-export const query = {
+export const queries = {
     getUsers: async (parent, args, { models }) => {
         const { User } = models
         const user = await User.find(args)
@@ -7,6 +7,14 @@ export const query = {
     getUserById: async (parent, args, { models }) => {
         const { User } = models
         const user = await User.findOne(args)
+        return user
+    }
+}
+
+export const mutations = {
+    createUser: async (parent, args, { models }) => {
+        const { User } = models
+        const user = await new User(args).save()
         return user
     }
 }

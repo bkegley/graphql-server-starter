@@ -1,6 +1,14 @@
-import { DatabaseError } from '../errors'
+import { DatabaseError } from '../../utils/errors'
 
-export const mutation = {
+export const queries = {
+    getScopes: async (parent, args, { models }) => {
+        const { Scope } = models
+        const scope = await Scope.find(args)
+        return scope
+    }
+}
+
+export const mutations = {
     createScope: async (parent, args, { models }) => {
 
         // https://stackoverflow.com/a/15829686

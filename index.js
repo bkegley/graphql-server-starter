@@ -8,10 +8,13 @@ import { SubscriptionServer } from 'subscriptions-transport-ws'
 import cors from 'cors'
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express'
 import { makeExecutableSchema } from 'graphql-tools'
-import typeDefs from './schema'
-import resolvers from './resolvers'
-import schemaDirectives from './resolvers/directives'
-import * as models from './models'
+
+import {
+  models,
+  typeDefs,
+  resolvers,
+  schemaDirectives
+} from './utils/parseModules'
 
 import mongoose from 'mongoose'
 
