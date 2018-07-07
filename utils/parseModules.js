@@ -1,12 +1,30 @@
-import requireDir from 'require-dir'
-import * as interfaces from '../modules/interfaces'
+import fs from 'fs'
 
-const modules = requireDir('../modules', { recurse: true })
+// base path without the trailing '/'
+const basePath = ('.')
 
-// TODO: normalize directories here
-
-// initialize variables
-let types = [`
+const parseModules = (
+    dir,
+    models = {},
+    tmpResolvers = {
+        queries: {
+            Query: {
+                _root: () => 'Hello world!'
+            }
+        },
+        mutations: {
+            Mutation: {
+                _root: () => 'Hello world!'
+            }
+        },
+        subscriptions: {
+            Subscription: {
+                _root: () => 'Hello world!'
+            }
+        },
+        namedResolvers: {}
+    },
+    types = [`
     type Query {
         _root: String
     }
@@ -14,84 +32,112 @@ let types = [`
     type Mutation {
         _root: String
     }
-    
+
     type Subscription {
         _root: String
     }
-`]
-
-const tmpResolvers = {
-    queries: {
-        Query: {
-            _root: () => 'Hello world!'
+    `]
+) => {
+    fs.readdirSync(dir).map(name => {
+        if (fs.statSync(`${dir}/${name}`).isDirectory()) {
+            parseModules(`${dir}/${name}`, models, tmpResolvers, types)
+        } else {
+            const moduleName = dir
+                .replace(`${basePath}/modules/`,'')
+                .split('/').map(dir => `${dir[0].toUpperCase()}${dir.slice(1)}`)
+                .join('')
+            name.includes('model') ? parseModel(name, dir, models, moduleName)
+            : name.includes('resolvers') ? parseResolvers(name, dir, tmpResolvers)
+            : name.includes('types') ? parseTypes(name, dir, types)
+            : console.log(`did not recognize ${name} on path of ${dir}`)
         }
-    },
-    mutations: {
-        Mutation: {
-            _root: () => 'Hello world!'
-        }
-    },
-    subscriptions: {
-        Subscription: {
-            _root: () => 'Hello world!'
-        }
-    },
-    namedResolvers: {...interfaces}
-}
-
-const models = {}
-
-const schemaDirectives = {}
-
-const parseModule = (mod, name, tmpResolvers, models, types) => {
-    Object.keys(mod).map(async key => {
-        key === 'resolvers' ? parseResolvers(mod[key], name, tmpResolvers)
-        // if types push string to typeDef array
-        : key === 'types' ? types.push(mod[key].default)
-        // if model push named model to models
-        : key === 'model' ? Object.assign(models, {[name]: mod[key].default})
-        : console.warn(`File ${key} on module ${name} was not parsed.`)
     })
+
+    const { queries, mutations, subscriptions, namedResolvers } = tmpResolvers
+    const resolvers = Object.assign(
+        {},
+        queries,
+        mutations,
+        subscriptions,
+        namedResolvers
+    )
+
+    const moduleTypeDefs = types.join('\n')
+    
+    return {
+        models,
+        resolvers,
+        moduleTypeDefs
+    }
 }
 
-const parseResolvers = (moduleResolvers, name, { queries, mutations, subscriptions, namedResolvers}) => {
-    Object.keys(moduleResolvers).map(key => {
-        const resolver = moduleResolvers[key]
-        key === 'queries' ? Object.assign(queries.Query, resolver)
-        : key === 'mutations' ? Object.assign(mutations.Mutation, resolver)
-        : key === 'subscriptions' ? Object.assign(subscriptions.Subscription, resolver)
-        : key === name ? Object.assign(namedResolvers, {[name]: resolver})
-        : console.warn(`Resolver export ${key} on module ${name} was not parsed.`)    
-    }) 
+const parseModel = (name, dir, models, moduleName) => {
+    const modelExport = require(`.${dir}/${name}`)
+    modelExport.default ? Object.assign(models, { [moduleName] :modelExport.default }) : console.warn(`Please export model in .${dir}/${name} as default`)
 }
 
-// iterate over modules
-Object.values(modules).map( (mod, index) => {
-    parseModule(mod, Object.keys(modules)[index], tmpResolvers, models, types)
-})
+const parseResolvers = (name, dir, tmpResolvers) => {
+    const resolverExports = require(`.${dir}/${name}`)
+    Object.assign(tmpResolvers.queries.Query, resolverExports.queries)
+    Object.assign(tmpResolvers.mutations.Mutation, resolverExports.mutations)
+    Object.assign(tmpResolvers.subscriptions.Subscription, resolverExports.subscriptions)
+    const { queries, mutations, subscriptions, ...namedResolvers } = resolverExports
+    Object.keys(namedResolvers).map(key => {
+        const resolver = namedResolvers[key]
+        if (resolver !== null && typeof resolver === 'object') Object.assign(tmpResolvers.namedResolvers, {[key]: resolver})
+    })
+    
+}
 
-// parse directives
-const directivesTypeDefs = requireDir('../directives/typeDefs')
-Object.values(directivesTypeDefs).map(directive => {
-    types.push(directive.default)
-})
+const parseTypes = (name, dir, types) => {
+    const typesExports = require(`.${dir}/${name}`)
+    typesExports.default ? types = types.push(typesExports.default) : console.warn(`Please export Types in ${dir}/${name} as default`)
+}
 
-const directivesResolvers = requireDir('../directives/resolvers')
-Object.values(directivesResolvers).map(directive => {
-    Object.assign(schemaDirectives, directive.default)
-})
+const parseDirectives = (
+    dir,
+    types = [],
+    schemaDirectives = {}
+) => {
+    fs.readdirSync(dir).map(name => {
+        if (fs.statSync(`${dir}/${name}`).isDirectory()) {
+            return parseDirectives(`${dir}/${name}`, types, schemaDirectives)
+        } else {
+            const fileExports = require(`.${dir}/${name}`)
+            Object.keys(fileExports).map(key => {
+                const moduleExport = fileExports[key]
+                moduleExport !== null && typeof moduleExport === 'object' ? Object.assign(schemaDirectives, moduleExport)
+                : typeof moduleExport === 'string' ? types.push(moduleExport)
+                : console.log(`did not recognize ${name} on path of ${dir}`)
+            })
+        }
+    })
 
-const { queries, mutations, subscriptions, namedResolvers } = tmpResolvers
-export const resolvers = Object.assign(
-    {},
-    queries,
-    mutations,
-    subscriptions,
-    namedResolvers
-)
+    const directiveTypeDefs = types.join('\n')
+    return {
+        schemaDirectives,
+        directiveTypeDefs
+    }
+}
 
-export const typeDefs = types.join('\n')
+const parseAll = (modulePath, directivePath) => {
+    const { models, moduleTypeDefs, resolvers } = parseModules(modulePath)
+    const { schemaDirectives, directiveTypeDefs } = parseDirectives(directivePath)
+    const typeDefs = moduleTypeDefs.concat(`\n${directiveTypeDefs}`)
 
-export { models }
+    return {
+        models,
+        resolvers,
+        typeDefs,
+        schemaDirectives
+    }
+}
 
-export { schemaDirectives }
+const { models, resolvers, typeDefs, schemaDirectives } = parseAll('./modules', './directives')
+
+export {
+    models,
+    resolvers,
+    typeDefs,
+    schemaDirectives
+}
