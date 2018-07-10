@@ -13,14 +13,8 @@ const User = new Schema({
     },
     scope: {
         type: [String]
-    },
-    createdAt: {
-        type: Date
-    },
-    updatedAt: {
-        type: Date
     }
-})
+}, { timestamps: true })
 
 User.pre('save', function(next) {
     if (!this.createdAt) {

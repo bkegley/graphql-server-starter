@@ -24,14 +24,8 @@ const Article = new Schema({
     },
     published: {
         type: Boolean
-    },
-    createdAt: {
-        type: Date
-    },
-    updatedAt: {
-        type: Date
     }
-})
+}, { timestamps: true })
 
 Article.pre('save', function(next) {
     if (!this.createdAt) {

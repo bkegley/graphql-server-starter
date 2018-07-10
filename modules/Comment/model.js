@@ -10,17 +10,8 @@ export const Comment = new Schema({
     },
     parentResource: {
         type: String
-    },
-    createdAt: {
-        type: Date
-    },
-    updatedAt: {
-        type: Date
-    },
-    isArticleComment: {
-        type: Boolean
     }
-})
+}, { timestamps: true })
 
 Comment.pre('save', function(next) {
     if (!this.createdAt) {
