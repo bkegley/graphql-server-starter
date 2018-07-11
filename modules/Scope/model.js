@@ -16,14 +16,8 @@ const Scope = new Schema({
     },
     field: {
         type: String
-    },
-    createdAt: {
-        type: Date
-    },
-    updatedAt: {
-        type: Date
     }
-})
+}, { timestamps: true })
 
 Scope.pre('save', function(next) {
     if (!this.createdAt) {
